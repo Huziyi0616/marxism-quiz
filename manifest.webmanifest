@@ -1,0 +1,19 @@
+{
+  "name": "马原选择题记忆练习",
+  "short_name": "马原刷题",
+  "description": "根据复习大纲生成的马原选择题练习应用，支持错题和常错知识点记录。",
+  "start_url": "marxism_quiz.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#b33a3a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

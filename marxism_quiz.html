@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#b33a3a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>马原选择题记忆练习</title>
+  <style>
+    :root {
+      --ink: #1d232b;
+      --muted: #667085;
+      --line: #d8dee8;
+      --paper: #f7f5ef;
+      --surface: #ffffff;
+      --soft: #eef4f1;
+      --accent: #b33a3a;
+      --accent-dark: #8f2929;
+      --green: #2f7d58;
+      --amber: #9a6a12;
+      --blue: #2f5f98;
+      --shadow: 0 18px 45px rgba(27, 37, 51, 0.12);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(179, 58, 58, 0.08), transparent 35%),
+        linear-gradient(315deg, rgba(47, 95, 152, 0.10), transparent 42%),
+        var(--paper);
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 32px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 18px 0 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3.2vw, 42px);
+      letter-spacing: 0;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .mini-visual {
+      width: 184px;
+      height: 112px;
+      border-radius: 8px;
+      background:
+        linear-gradient(120deg, rgba(179, 58, 58, .94), rgba(143, 41, 41, .86)),
+        radial-gradient(circle at 72% 24%, rgba(255, 255, 255, .7), transparent 28%);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mini-visual::before,
+    .mini-visual::after {
+      content: "";
+      position: absolute;
+      background: rgba(255, 255, 255, .92);
+      border-radius: 5px;
+      transform: rotate(-7deg);
+    }
+
+    .mini-visual::before {
+      width: 108px;
+      height: 70px;
+      left: 22px;
+      top: 26px;
+      box-shadow: 0 9px 0 rgba(255, 255, 255, .38);
+    }
+
+    .mini-visual::after {
+      width: 64px;
+      height: 8px;
+      left: 44px;
+      top: 48px;
+      box-shadow: 0 17px 0 rgba(29, 35, 43, .18), 0 34px 0 rgba(29, 35, 43, .12);
+      background: rgba(29, 35, 43, .28);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 4px 0 20px;
+    }
+
+    .tool-button,
+    .mode-button,
+    .option-button,
+    .text-button {
+      min-height: 42px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+
+    .mode-button,
+    .tool-button,
+    .text-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .74);
+      color: var(--ink);
+    }
+
+    .mode-button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .tool-button:hover,
+    .mode-button:hover,
+    .text-button:hover,
+    .option-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .quiz-panel,
+    .side-panel {
+      background: rgba(255, 255, 255, .88);
+      border: 1px solid rgba(216, 222, 232, .9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .quiz-panel {
+      min-height: 560px;
+      padding: 22px;
+    }
+
+    .side-panel {
+      padding: 18px;
+    }
+
+    .question-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: #285944;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: #e6e9ef;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--blue));
+      transition: width .2s ease;
+    }
+
+    .question {
+      margin: 0 0 18px;
+      font-size: clamp(21px, 2.6vw, 30px);
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .option-button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: center;
+      text-align: left;
+      color: var(--ink);
+      background: #fbfcff;
+      border: 1px solid var(--line);
+      line-height: 1.55;
+    }
+
+    .option-letter {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: var(--blue);
+      background: #e8eef7;
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+
+    .option-button.correct {
+      border-color: rgba(47, 125, 88, .58);
+      background: #edf7f1;
+    }
+
+    .option-button.correct .option-letter {
+      background: var(--green);
+      color: white;
+    }
+
+    .option-button.wrong {
+      border-color: rgba(179, 58, 58, .58);
+      background: #fff0f0;
+    }
+
+    .option-button.wrong .option-letter {
+      background: var(--accent);
+      color: white;
+    }
+
+    .option-button:disabled {
+      cursor: default;
+      transform: none;
+    }
+
+    .feedback {
+      display: none;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fffaf0;
+      line-height: 1.7;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback strong {
+      color: var(--accent-dark);
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 10px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 7px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .side-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .search {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      color: var(--ink);
+      background: #fff;
+      margin-bottom: 12px;
+    }
+
+    .point-list {
+      display: grid;
+      gap: 10px;
+      max-height: 460px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .point-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .point-item button {
+      width: 100%;
+      text-align: left;
+      padding: 0;
+      background: transparent;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    .point-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .danger {
+      color: var(--accent-dark);
+    }
+
+    .success {
+      color: var(--green);
+    }
+
+    .empty {
+      color: var(--muted);
+      line-height: 1.7;
+      padding: 12px 0;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-visual {
+        display: none;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        width: min(100% - 20px, 1180px);
+        padding-top: 12px;
+      }
+
+      .quiz-panel,
+      .side-panel {
+        padding: 14px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .mode-button,
+      .tool-button,
+      .text-button {
+        justify-content: center;
+      }
+
+      .option-button {
+        grid-template-columns: 32px 1fr;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>马原选择题记忆练习</h1>
+        <p class="subtitle">根据你的复习大纲整理为 26 个核心考点，每个考点会随机变换题干。答错会自动记录到常错知识点，刷新页面后记录仍会保留。</p>
+      </div>
+      <div class="mini-visual" aria-hidden="true"></div>
+    </header>
+
+    <section class="controls" aria-label="练习模式">
+      <button id="randomMode" class="mode-button active" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M16 3h5v5"></path><path d="M4 20 21 3"></path><path d="M21 16v5h-5"></path><path d="M15 15l6 6"></path><path d="M4 4l5 5"></path></svg>
+        随机练习
+      </button>
+      <button id="orderMode" class="mode-button" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+        顺序练习
+      </button>
+      <button id="wrongMode" class="mode-button" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        错题强化
+      </button>
+      <button id="resetStats" class="tool-button" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+        清空记录
+      </button>
+    </section>
+
+    <section class="layout">
+      <article class="quiz-panel" aria-live="polite">
+        <div class="question-meta">
+          <span id="counter">第 1 / 25 题</span>
+          <span id="tag" class="tag">马克思主义总论</span>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <h2 id="questionText" class="question"></h2>
+        <div id="options" class="options"></div>
+        <div id="feedback" class="feedback"></div>
+        <div class="quiz-actions">
+          <button id="nextQuestion" class="text-button primary" type="button">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            下一题
+          </button>
+          <button id="showAnswer" class="text-button" type="button">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            查看答案
+          </button>
+        </div>
+      </article>
+
+      <aside class="side-panel">
+        <div class="stats-grid">
+          <div class="stat"><b id="doneCount">0</b><span>已答题</span></div>
+          <div class="stat"><b id="accuracy">0%</b><span>正确率</span></div>
+          <div class="stat"><b id="wrongCount">0</b><span>错题数</span></div>
+        </div>
+
+        <h3 class="side-title">常错知识点</h3>
+        <input id="searchInput" class="search" type="search" placeholder="搜索考点或关键词">
+        <div id="pointList" class="point-list"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        id: "q01",
+        category: "马克思主义总论",
+        point: "唯物史观和剩余价值学说是马克思一生的两个伟大发现。",
+        question: "马克思一生的两个伟大发现是下列哪一组？",
+        options: ["唯物史观和剩余价值学说", "辩证法和形而上学批判", "劳动价值论和国家学说", "实践观和人民史观"],
+        answer: 0,
+        explanation: "大纲指出，马克思通过政治经济学研究系统阐述剩余价值学说；唯物史观和剩余价值学说是他的两个伟大发现。"
+      },
+      {
+        id: "q02",
+        category: "马克思主义总论",
+        point: "人民性是马克思主义的本质属性，人民至上是马克思主义的政治立场。",
+        question: "关于马克思主义的人民性，下列说法正确的是？",
+        options: ["人民性是本质属性，人民至上是政治立场", "阶级性是本质属性，技术至上是政治立场", "实践性是本质属性，国家至上是政治立场", "科学性是唯一属性，不涉及政治立场"],
+        answer: 0,
+        explanation: "马克思主义植根人民之中，是来自人民、为了人民、造福人民的理论。"
+      },
+      {
+        id: "q03",
+        category: "唯物论",
+        point: "哲学的物质概念与自然科学的物质概念之间是共性与个性的关系。",
+        question: "哲学的物质概念与自然科学的物质概念之间的关系是？",
+        options: ["共性与个性的关系", "原因与结果的关系", "本质与现象完全等同的关系", "整体与部分完全割裂的关系"],
+        answer: 0,
+        explanation: "哲学物质概念概括的是一切客观实在的共性，自然科学中的物质形态体现具体个性。"
+      },
+      {
+        id: "q04",
+        category: "辩证法",
+        point: "否定之否定规律揭示了事物发展的前进性与曲折性的统一。",
+        question: "否定之否定规律主要揭示了事物发展的什么特征？",
+        options: ["前进性与曲折性的统一", "静止性与绝对性的统一", "偶然性对必然性的取消", "形式对内容的完全决定"],
+        answer: 0,
+        explanation: "否定之否定规律说明发展不是直线式的，而是在曲折中前进。"
+      },
+      {
+        id: "q05",
+        category: "辩证法",
+        point: "任何事物都是内容与形式的统一；内容是基础，形式对内容有反作用。",
+        question: "关于内容与形式的关系，下列说法正确的是？",
+        options: ["内容是事物存在的基础，形式对内容具有反作用", "形式是唯一基础，内容没有独立意义", "内容和形式互不相关", "形式只能消极适应内容，不能产生反作用"],
+        answer: 0,
+        explanation: "大纲强调任何事物都是内容与形式的统一，既要看到内容的基础地位，也要看到形式的反作用。"
+      },
+      {
+        id: "q06",
+        category: "思维方法",
+        point: "创新思维能力是对常规思维的突破。",
+        question: "创新思维能力的核心含义是？",
+        options: ["突破常规思维，因时制宜、开拓创新", "固守既有经验，避免改变", "排斥实践检验，只重主观想象", "用单一标准处理所有问题"],
+        answer: 0,
+        explanation: "创新思维要求破除迷信、超越陈规，善于知难而进和开拓创新。"
+      },
+      {
+        id: "q07",
+        category: "实践观",
+        point: "马克思在《关于费尔巴哈的提纲》中系统论述实践观点，创立科学实践观。",
+        question: "马克思在哪一文本中系统论述实践观点，揭示科学实践观的基本内容？",
+        options: ["《关于费尔巴哈的提纲》", "《资本论》第一卷", "《论欧洲联邦口号》", "《共产党宣言》序言"],
+        answer: 0,
+        explanation: "大纲称《关于费尔巴哈的提纲》是包含新世界观天才萌芽的第一个文件，其中系统论述了实践观点。"
+      },
+      {
+        id: "q08",
+        category: "实践观",
+        point: "物质资料的生产是人类历史中首要的社会实践活动。",
+        question: "马克思、恩格斯认为，人类历史中首要的社会实践活动是？",
+        options: ["物质资料的生产", "纯粹理论沉思", "宗教仪式活动", "审美娱乐活动"],
+        answer: 0,
+        explanation: "物质资料生产是其他一切历史活动得以进行的前提。"
+      },
+      {
+        id: "q09",
+        category: "认识论",
+        point: "实践是认识的来源、动力、目的，并且是检验认识真理性的唯一标准。",
+        question: "下列哪一项不是实践对认识决定作用的表现？",
+        options: ["实践是认识的任意装饰", "实践是认识的来源", "实践是认识发展的动力", "实践是检验认识真理性的唯一标准"],
+        answer: 0,
+        explanation: "实践对认识的决定作用包括来源、动力、目的和检验真理性的唯一标准。"
+      },
+      {
+        id: "q10",
+        category: "认识论",
+        point: "唯物主义认识路线坚持反映论，认为认识是主体对客体的反映。",
+        question: "唯物主义认识路线坚持的基本立场是？",
+        options: ["反映论", "先验论", "不可知论", "唯意志论"],
+        answer: 0,
+        explanation: "反映论认为认识是主体对客体的反映，人的知识来自后天接触实际。"
+      },
+      {
+        id: "q11",
+        category: "认识论",
+        point: "感性认识和理性认识的辩证统一关系是在实践基础上形成的。",
+        question: "割裂感性认识和理性认识的辩证统一关系，可能导致什么错误？",
+        options: ["教条主义或经验主义", "人民史观或群众路线", "商品经济或市场交换", "参与制或个人联合"],
+        answer: 0,
+        explanation: "片面夸大理性认识会走向唯理论和教条主义；片面夸大感性认识会走向经验论和经验主义。"
+      },
+      {
+        id: "q12",
+        category: "历史观",
+        point: "社会存在决定社会意识，是唯物史观与唯心史观的根本分野。",
+        question: "唯物史观与唯心史观的根本分野在于是否承认？",
+        options: ["社会存在决定社会意识", "社会意识完全脱离社会存在", "英雄意志决定全部历史", "自然科学概念决定政治立场"],
+        answer: 0,
+        explanation: "主张社会存在决定社会意识，还是社会意识决定社会存在，是两种历史观的根本分野。"
+      },
+      {
+        id: "q13",
+        category: "历史观",
+        point: "人民群众是社会物质财富和精神财富的创造者，是社会变革的决定力量。",
+        question: "人民群众在社会历史发展中的作用是？",
+        options: ["起决定性作用", "只在精神文化领域起作用", "只被动接受历史安排", "完全由少数英雄替代"],
+        answer: 0,
+        explanation: "人民群众创造物质财富、精神财富，并且是社会变革的决定力量。"
+      },
+      {
+        id: "q14",
+        category: "政治经济学",
+        point: "商品经济是社会经济发展到一定阶段的产物。",
+        question: "商品经济的形成应理解为？",
+        options: ["社会经济发展到一定阶段的产物", "人类社会一开始就永恒存在的形式", "只由货币出现单独决定", "与交换和分工无关的偶然现象"],
+        answer: 0,
+        explanation: "商品经济不是天然永恒的，而是社会经济发展到一定阶段的产物。"
+      },
+      {
+        id: "q15",
+        category: "政治经济学",
+        point: "商品是用来交换、能满足人的某种需要的劳动产品；决定交换比例的是价值。",
+        question: "决定商品交换比例的因素是？",
+        options: ["价值", "使用价值", "商品外观", "购买者的即时心情"],
+        answer: 0,
+        explanation: "商品具有使用价值和价值，但决定交换比例的是价值。"
+      },
+      {
+        id: "q16",
+        category: "政治经济学",
+        point: "价值是凝结在商品中的无差别的一般人类劳动。",
+        question: "马克思主义政治经济学中，商品价值的实体是？",
+        options: ["无差别的一般人类劳动", "商品的自然属性", "消费者的主观偏好", "货币符号本身"],
+        answer: 0,
+        explanation: "价值是凝结在商品中的无差别的一般人类劳动，即人的脑力和体力耗费。"
+      },
+      {
+        id: "q17",
+        category: "政治经济学",
+        point: "决定商品价值量的是社会必要劳动时间，而不是个别劳动时间。",
+        question: "决定商品价值量的是？",
+        options: ["社会必要劳动时间", "个别劳动时间", "企业广告投入", "商品使用年限"],
+        answer: 0,
+        explanation: "个别劳动时间不决定商品价值量，决定因素是社会必要劳动时间。"
+      },
+      {
+        id: "q18",
+        category: "政治经济学",
+        point: "商品价值量与社会必要劳动时间成正比，与劳动生产率成反比。",
+        question: "劳动生产率提高时，单位商品价值量通常会怎样变化？",
+        options: ["降低", "提高", "完全不变", "先消失再恢复"],
+        answer: 0,
+        explanation: "劳动生产率越高，单位商品所需社会必要劳动时间越少，单位商品价值量越小。"
+      },
+      {
+        id: "q19",
+        category: "政治经济学",
+        point: "马克思把商品转换成货币称为商品的惊险的跳跃。",
+        question: "马克思把商品转换成货币称为？",
+        options: ["商品的惊险的跳跃", "价值的自然消失", "劳动的直接完成", "资本的无条件增殖"],
+        answer: 0,
+        explanation: "货币出现并未根本消除商品经济矛盾，商品能否顺利换成货币关系到商品占有者。"
+      },
+      {
+        id: "q20",
+        category: "政治经济学",
+        point: "价值规律自发调节生产资料和劳动力分配，刺激生产力发展，调节社会收入分配。",
+        question: "下列哪项属于价值规律在市场配置资源中的作用？",
+        options: ["自发地刺激社会生产力的发展", "彻底消灭商品经济矛盾", "保证所有商品价格永远等于价值", "直接取消社会收入差别"],
+        answer: 0,
+        explanation: "价值规律的作用包括自发调节资源分配、刺激生产力发展、调节社会收入分配。"
+      },
+      {
+        id: "q21",
+        category: "剩余价值理论",
+        point: "剩余价值是雇佣工人创造并被资本家无偿占有的超过劳动力价值的那部分价值。",
+        question: "剩余价值体现的是哪种关系？",
+        options: ["资本家与雇佣工人之间剥削与被剥削的关系", "商品与货币之间完全平等的自然关系", "国家与市场之间无差别的管理关系", "生产资料与消费资料之间的技术关系"],
+        answer: 0,
+        explanation: "剩余价值是雇佣工人剩余劳动的凝结，体现资本主义剥削关系。"
+      },
+      {
+        id: "q22",
+        category: "资本主义经济危机",
+        point: "生产过剩是资本主义经济危机的本质特征，但这种过剩是相对过剩。",
+        question: "资本主义经济危机中生产过剩的性质是？",
+        options: ["相对于劳动人民有支付能力的需求而言的相对过剩", "相对于人类实际需要而言的绝对过剩", "所有商品自然属性完全过剩", "货币数量过少造成的唯一现象"],
+        answer: 0,
+        explanation: "这里的过剩不是相对实际需要的绝对过剩，而是相对有支付能力的需求而言的过剩。"
+      },
+      {
+        id: "q23",
+        category: "垄断资本主义",
+        point: "金融寡头经济统治主要通过参与制，控制国家机器主要通过个人联合。",
+        question: "金融寡头在经济领域中的统治主要通过什么实现？",
+        options: ["参与制", "个人联合", "按劳分配", "群众路线"],
+        answer: 0,
+        explanation: "经济领域主要是参与制；对国家机器的控制主要通过同政府的个人联合。"
+      },
+      {
+        id: "q24",
+        category: "垄断资本主义",
+        point: "国家垄断资本主义是国家政权和私人垄断资本融合在一起的垄断资本主义。",
+        question: "国家垄断资本主义是指？",
+        options: ["国家政权和私人垄断资本融合在一起的垄断资本主义", "国家完全消灭私人资本后的共产主义", "自由竞争资本主义的初级萌芽", "个人消费品按需分配的社会形态"],
+        answer: 0,
+        explanation: "关键表述是国家政权与私人垄断资本融合。"
+      },
+      {
+        id: "q25",
+        category: "科学社会主义",
+        point: "列宁指出社会主义革命可以首先在一个或者几个国家获得胜利。",
+        question: "列宁根据资本主义经济和政治发展不平衡规律，得出的重要结论是？",
+        options: ["社会主义可能首先在少数甚至单独一个资本主义国家内获得胜利", "社会主义必须同时在所有国家取得胜利", "社会主义只能在最发达国家最后出现", "资本主义发展不平衡会自动消灭阶级差别"],
+        answer: 0,
+        explanation: "列宁在 1915 年《论欧洲联邦口号》中明确论述，社会主义可能首先在少数甚至单独一个资本主义国家内获得胜利。"
+      },
+      {
+        id: "q26",
+        category: "共产主义社会",
+        point: "共产主义高级阶段实行各尽所能、按需分配；第一阶段实行各尽所能、按劳分配。",
+        question: "关于共产主义社会个人消费品分配方式，下列说法正确的是？",
+        options: ["高级阶段是各尽所能、按需分配", "第一阶段就是各尽所能、按需分配", "高级阶段只能实行按劳分配", "两个阶段的分配方式完全相同"],
+        answer: 0,
+        explanation: "马克思认为共产主义第一阶段实行各尽所能、按劳分配，进入高级阶段后才能实现按需分配。"
+      }
+    ];
+
+    const variantBank = {
+      q01: [
+        "下列哪一组最准确概括马克思一生的两个伟大发现？",
+        "如果题目问马克思揭示资本主义生产关系秘密并创立科学历史观的重大成果，应选哪一项？"
+      ],
+      q02: [
+        "马克思主义为什么说是来自人民、为了人民、造福人民的理论？",
+        "关于马克思主义的本质属性和政治立场，下列搭配正确的是？"
+      ],
+      q03: [
+        "哲学物质范畴和自然科学具体物质概念之间，最恰当的理解是？",
+        "若把哲学上的物质概念看作概括一般属性，自然科学物质概念看作具体形态，二者关系是？"
+      ],
+      q04: [
+        "事物发展不是直线前进，而是在曲折中前进，这体现哪一规律的内容？",
+        "强调发展过程具有前进方向，同时又会经历反复和曲折，体现的是？"
+      ],
+      q05: [
+        "分析一个事物时，既要看其内容基础，也要看形式作用，这体现什么关系？",
+        "下列哪一项符合马克思主义关于内容和形式关系的理解？"
+      ],
+      q06: [
+        "面对新情况破除迷信、超越陈规，体现的是哪种能力？",
+        "善于因时制宜、知难而进、开拓创新，主要体现的是？"
+      ],
+      q07: [
+        "被称为包含新世界观天才萌芽的第一个文件，并系统论述实践观点的是？",
+        "马克思创立科学实践观时，集中阐发实践观点的重要文本是？"
+      ],
+      q08: [
+        "在人类历史活动中，什么活动是其他一切历史活动得以进行的前提？",
+        "《德意志意识形态》中强调的首要社会实践活动是？"
+      ],
+      q09: [
+        "实践对认识具有决定作用。下列说法中不属于这一作用的是？",
+        "关于实践和认识的关系，下列哪一项表述是错误的？"
+      ],
+      q10: [
+        "认为认识是主体对客体的反映，这属于哪条认识路线？",
+        "唯物主义认识论认为人的知识来自后天接触实际，其基本立场是？"
+      ],
+      q11: [
+        "片面夸大理性认识或感性认识，分别容易陷入哪类错误？",
+        "如果脱离实践割裂感性认识和理性认识，最可能造成什么偏差？"
+      ],
+      q12: [
+        "判断一种历史观是唯物史观还是唯心史观，根本看它如何回答什么关系？",
+        "社会历史观上的根本分野，集中体现在哪个判断上？"
+      ],
+      q13: [
+        "社会物质财富、精神财富和社会变革的决定力量是谁？",
+        "马克思主义群众史观认为，社会历史发展的决定性主体是？"
+      ],
+      q14: [
+        "商品经济并非从来就有，而应被理解为什么？",
+        "关于商品经济的历史性质，下列判断正确的是？"
+      ],
+      q15: [
+        "商品可以满足需要，但决定商品交换比例的不是这种属性，而是什么？",
+        "两种商品为什么能按一定比例交换？从大纲知识点看，决定因素是？"
+      ],
+      q16: [
+        "凝结在商品中的无差别的一般人类劳动，被称为什么？",
+        "商品价值所体现的人的脑力和体力耗费，指向的是哪一概念？"
+      ],
+      q17: [
+        "衡量商品价值量时，关键依据不是某个生产者耗费的时间，而是什么？",
+        "如果个别劳动时间高于社会平均水平，商品价值量仍由什么决定？"
+      ],
+      q18: [
+        "在其他条件不变时，劳动生产率和单位商品价值量之间是什么关系？",
+        "生产每件商品所需社会必要劳动时间减少，单位商品价值量通常会如何变化？"
+      ],
+      q19: [
+        "商品能否顺利换成货币，被马克思形象地称为什么？",
+        "货币没有根本消除商品经济矛盾，因此商品转换成货币被称为？"
+      ],
+      q20: [
+        "价值规律在市场中发挥作用时，会对社会生产力产生什么影响？",
+        "下列哪一项能体现价值规律对资源配置和生产发展的作用？"
+      ],
+      q21: [
+        "雇佣工人创造、超过劳动力价值并被资本家无偿占有的价值是什么？",
+        "揭示资本家和雇佣工人之间剥削关系的核心范畴是？"
+      ],
+      q22: [
+        "资本主义经济危机中的生产过剩，为什么说不是绝对过剩？",
+        "所谓资本主义生产过剩，主要是相对于哪种需求而言？"
+      ],
+      q23: [
+        "金融寡头通过掌握股票控制额来支配企业体系，这种经济统治方式叫作？",
+        "在垄断资本主义中，金融寡头实现经济统治的主要形式是？"
+      ],
+      q24: [
+        "国家政权与私人垄断资本结合起来，形成的资本主义形式是？",
+        "如果题目强调国家力量和私人垄断资本融合，应选择哪一概念？"
+      ],
+      q25: [
+        "列宁从资本主义经济政治发展不平衡规律出发，提出社会主义革命可能怎样胜利？",
+        "1915 年列宁关于社会主义革命胜利道路的重要判断是？"
+      ],
+      q26: [
+        "马克思认为共产主义第一阶段和高级阶段在个人消费品分配上有什么区别？",
+        "进入共产主义高级阶段后，个人消费品分配方式应是什么？"
+      ]
+    };
+
+    const storageKey = "marxism-quiz-v1";
+    const letters = ["A", "B", "C", "D"];
+    let stats = loadStats();
+    let mode = "random";
+    let queue = [];
+    let currentIndex = 0;
+    let answered = false;
+    let currentQuestion = null;
+
+    const el = {
+      counter: document.getElementById("counter"),
+      tag: document.getElementById("tag"),
+      progressBar: document.getElementById("progressBar"),
+      questionText: document.getElementById("questionText"),
+      options: document.getElementById("options"),
+      feedback: document.getElementById("feedback"),
+      next: document.getElementById("nextQuestion"),
+      showAnswer: document.getElementById("showAnswer"),
+      randomMode: document.getElementById("randomMode"),
+      orderMode: document.getElementById("orderMode"),
+      wrongMode: document.getElementById("wrongMode"),
+      resetStats: document.getElementById("resetStats"),
+      doneCount: document.getElementById("doneCount"),
+      accuracy: document.getElementById("accuracy"),
+      wrongCount: document.getElementById("wrongCount"),
+      pointList: document.getElementById("pointList"),
+      searchInput: document.getElementById("searchInput")
+    };
+
+    function loadStats() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (saved && typeof saved === "object") return saved;
+      } catch (error) {}
+      return {};
+    }
+
+    function saveStats() {
+      localStorage.setItem(storageKey, JSON.stringify(stats));
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildQueue(nextMode = mode) {
+      if (nextMode === "wrong") {
+        const wrong = questions.filter(q => (stats[q.id]?.wrong || 0) > 0);
+        return wrong.length ? shuffle(wrong) : [];
+      }
+      if (nextMode === "order") return [...questions];
+      return shuffle(questions);
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      currentIndex = 0;
+      queue = buildQueue(mode);
+      updateModeButtons();
+      renderQuestion();
+      renderStats();
+    }
+
+    function updateModeButtons() {
+      el.randomMode.classList.toggle("active", mode === "random");
+      el.orderMode.classList.toggle("active", mode === "order");
+      el.wrongMode.classList.toggle("active", mode === "wrong");
+    }
+
+    function renderQuestion() {
+      answered = false;
+      el.feedback.className = "feedback";
+      el.feedback.innerHTML = "";
+
+      if (!queue.length) {
+        currentQuestion = null;
+        el.counter.textContent = "暂无错题";
+        el.tag.textContent = "错题强化";
+        el.progressBar.style.width = "0%";
+        el.questionText.textContent = "现在还没有常错知识点。先去随机或顺序练习答几题，再回来强化。";
+        el.options.innerHTML = "";
+        el.showAnswer.disabled = true;
+        el.next.disabled = true;
+        return;
+      }
+
+      if (currentIndex >= queue.length) {
+        if (mode === "random") queue = shuffle(queue);
+        currentIndex = 0;
+      }
+
+      currentQuestion = queue[currentIndex];
+      el.counter.textContent = `第 ${currentIndex + 1} / ${queue.length} 题`;
+      el.tag.textContent = currentQuestion.category;
+      el.progressBar.style.width = `${((currentIndex + 1) / queue.length) * 100}%`;
+      el.questionText.textContent = randomPrompt(currentQuestion);
+      el.showAnswer.disabled = false;
+      el.next.disabled = false;
+
+      el.options.innerHTML = currentQuestion.options.map((option, index) => `
+        <button class="option-button" type="button" data-index="${index}">
+          <span class="option-letter">${letters[index]}</span>
+          <span>${option}</span>
+        </button>
+      `).join("");
+
+      [...el.options.querySelectorAll("button")].forEach(button => {
+        button.addEventListener("click", () => choose(Number(button.dataset.index)));
+      });
+    }
+
+    function randomPrompt(question) {
+      const variants = [question.question, ...(variantBank[question.id] || [])];
+      return variants[Math.floor(Math.random() * variants.length)];
+    }
+
+    function choose(index, revealOnly = false) {
+      if (!currentQuestion || answered) return;
+      answered = true;
+      const isCorrect = index === currentQuestion.answer;
+
+      if (!revealOnly) {
+        const record = stats[currentQuestion.id] || { attempts: 0, correct: 0, wrong: 0 };
+        record.attempts += 1;
+        if (isCorrect) {
+          record.correct += 1;
+          record.last = "correct";
+        } else {
+          record.wrong += 1;
+          record.last = "wrong";
+          record.lastWrongAt = new Date().toISOString();
+        }
+        stats[currentQuestion.id] = record;
+        saveStats();
+      }
+
+      [...el.options.querySelectorAll("button")].forEach(button => {
+        const buttonIndex = Number(button.dataset.index);
+        button.disabled = true;
+        if (buttonIndex === currentQuestion.answer) button.classList.add("correct");
+        if (!revealOnly && buttonIndex === index && !isCorrect) button.classList.add("wrong");
+      });
+
+      const status = revealOnly ? "答案" : (isCorrect ? "答对了" : "答错了");
+      const correctText = currentQuestion.options[currentQuestion.answer];
+      el.feedback.className = "feedback show";
+      el.feedback.innerHTML = `
+        <strong>${status}：${letters[currentQuestion.answer]}. ${correctText}</strong>
+        <div>${currentQuestion.explanation}</div>
+        <div>考点：${currentQuestion.point}</div>
+      `;
+      renderStats();
+    }
+
+    function nextQuestion() {
+      if (!queue.length) return;
+      currentIndex += 1;
+      renderQuestion();
+    }
+
+    function revealAnswer() {
+      if (!currentQuestion || answered) return;
+      choose(currentQuestion.answer, true);
+    }
+
+    function renderStats() {
+      const records = Object.values(stats);
+      const attempts = records.reduce((sum, item) => sum + (item.attempts || 0), 0);
+      const correct = records.reduce((sum, item) => sum + (item.correct || 0), 0);
+      const wrongQuestions = questions.filter(q => (stats[q.id]?.wrong || 0) > 0).length;
+      el.doneCount.textContent = attempts;
+      el.accuracy.textContent = attempts ? `${Math.round((correct / attempts) * 100)}%` : "0%";
+      el.wrongCount.textContent = wrongQuestions;
+      renderPointList();
+    }
+
+    function renderPointList() {
+      const keyword = el.searchInput.value.trim().toLowerCase();
+      const decorated = questions
+        .map(q => ({ ...q, stat: stats[q.id] || { attempts: 0, correct: 0, wrong: 0 } }))
+        .filter(q => {
+          if (!keyword) return true;
+          return `${q.category} ${q.point} ${q.question}`.toLowerCase().includes(keyword);
+        })
+        .sort((a, b) => {
+          const wrongDiff = (b.stat.wrong || 0) - (a.stat.wrong || 0);
+          if (wrongDiff) return wrongDiff;
+          return (b.stat.attempts || 0) - (a.stat.attempts || 0);
+        });
+
+      if (!decorated.length) {
+        el.pointList.innerHTML = `<div class="empty">没有匹配的考点。</div>`;
+        return;
+      }
+
+      el.pointList.innerHTML = decorated.map(q => {
+        const attempts = q.stat.attempts || 0;
+        const wrong = q.stat.wrong || 0;
+        const correct = q.stat.correct || 0;
+        const accuracy = attempts ? Math.round((correct / attempts) * 100) : 0;
+        const statusClass = wrong ? "danger" : (attempts ? "success" : "");
+        const status = wrong ? `错 ${wrong} 次` : (attempts ? "暂未答错" : "未练习");
+        return `
+          <div class="point-item">
+            <button type="button" data-jump="${q.id}">
+              <strong>${q.category}</strong><br>${q.point}
+            </button>
+            <div class="point-row">
+              <span class="${statusClass}">${status}</span>
+              <span>${attempts ? `正确率 ${accuracy}%` : "点击可练此题"}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      [...el.pointList.querySelectorAll("button[data-jump]")].forEach(button => {
+        button.addEventListener("click", () => jumpToQuestion(button.dataset.jump));
+      });
+    }
+
+    function jumpToQuestion(id) {
+      const found = questions.find(q => q.id === id);
+      if (!found) return;
+      mode = "order";
+      queue = [found, ...questions.filter(q => q.id !== id)];
+      currentIndex = 0;
+      updateModeButtons();
+      renderQuestion();
+    }
+
+    function resetStats() {
+      const ok = window.confirm("确定清空答题记录和常错知识点吗？");
+      if (!ok) return;
+      stats = {};
+      saveStats();
+      if (mode === "wrong") queue = buildQueue("wrong");
+      renderQuestion();
+      renderStats();
+    }
+
+    el.randomMode.addEventListener("click", () => setMode("random"));
+    el.orderMode.addEventListener("click", () => setMode("order"));
+    el.wrongMode.addEventListener("click", () => setMode("wrong"));
+    el.resetStats.addEventListener("click", resetStats);
+    el.next.addEventListener("click", nextQuestion);
+    el.showAnswer.addEventListener("click", revealAnswer);
+    el.searchInput.addEventListener("input", renderPointList);
+
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+
+    queue = buildQueue(mode);
+    renderQuestion();
+    renderStats();
+  </script>
+</body>
+</html>
