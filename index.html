@@ -296,6 +296,78 @@
       color: var(--accent-dark);
     }
 
+    .memory-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcff;
+      padding: 18px;
+      line-height: 1.75;
+    }
+
+    .memory-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #e8eef7;
+      color: var(--blue);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .memory-prompt {
+      font-size: 20px;
+      color: var(--ink);
+    }
+
+    .memory-hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .memory-answer {
+      display: grid;
+      gap: 10px;
+    }
+
+    .memory-answer b {
+      color: var(--accent-dark);
+    }
+
+    .memory-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .memory-actions .text-button {
+      min-height: 38px;
+      padding: 8px 12px;
+    }
+
+    .option-analysis {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .option-note {
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .72);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .option-note.correct-note {
+      border-color: rgba(47, 125, 88, .42);
+      background: #f0f8f3;
+    }
+
     .quiz-actions {
       display: flex;
       justify-content: space-between;
@@ -492,6 +564,10 @@
       <button id="wrongMode" class="mode-button" type="button">
         <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
         错题强化
+      </button>
+      <button id="cardMode" class="mode-button" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4v15.5"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        速记卡片
       </button>
       <button id="resetStats" class="tool-button" type="button">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
@@ -1327,15 +1403,229 @@
       ]
     };
 
+    const memoryCards = [
+      {
+        id: "q01",
+        category: "马克思主义总论",
+        prompt: "题干出现“揭示社会历史发展规律”和“揭开资本主义剥削秘密”时，分别对应马克思的哪两个伟大发现？",
+        answer: "唯物史观；剩余价值学说。",
+        trap: "不要把“科学社会主义”“劳动价值论”直接当作两个伟大发现。科学社会主义是马克思主义组成部分，劳动价值论是政治经济学中的重要理论基础。",
+        source: "唯物史观和剩余价值学说是马克思一生的两个伟大发现。"
+      },
+      {
+        id: "q02",
+        category: "马克思主义总论",
+        prompt: "题干强调“来自人民、为了人民、造福人民”，最容易考马克思主义的哪个本质属性和哪个政治立场？",
+        answer: "人民性；人民至上。",
+        trap: "不要写成“科学性、实践性”。科学性和实践性是重要特征，但这里的关键词是人民。",
+        source: "人民性是马克思主义的本质属性，人民至上是马克思主义的政治立场。"
+      },
+      {
+        id: "q03",
+        category: "唯物论",
+        prompt: "自然科学研究具体物质形态，哲学物质范畴概括一切客观实在。二者在选择题中常被概括为何种关系？",
+        answer: "共性与个性的关系。",
+        trap: "不要答成整体与部分、原因与结果。哲学物质概念更抽象，具体物质形态更特殊。",
+        source: "哲学的物质概念与自然科学的物质概念之间是共性与个性的关系。"
+      },
+      {
+        id: "q04",
+        category: "辩证法",
+        prompt: "材料说“发展不是一帆风顺，而是在反复和挫折中向前推进”，应想到哪一规律？",
+        answer: "否定之否定规律。",
+        trap: "如果只强调量的积累到质变，才偏向质量互变规律；这里关键词是前进性和曲折性。",
+        source: "否定之否定规律揭示了事物发展的前进性与曲折性的统一。"
+      },
+      {
+        id: "q05",
+        category: "辩证法",
+        prompt: "题干说“内容是基础，但表达形式、组织形式会影响内容实现”，应抓住哪对范畴？",
+        answer: "内容与形式。",
+        trap: "不要把“形式对内容有反作用”误解为“形式决定内容”。基础仍然是内容。",
+        source: "任何事物都是内容与形式的统一；内容是事物存在的基础，形式对内容具有反作用。"
+      },
+      {
+        id: "q06",
+        category: "思维方法",
+        prompt: "看到“破除迷信、超越陈规、因时制宜、开拓创新”这一串关键词，最应回忆哪个能力？",
+        answer: "创新思维能力。",
+        trap: "不是单纯经验总结，也不是脱离实际的主观想象；创新思维仍要面对现实问题。",
+        source: "创新思维能力是对常规思维的突破。"
+      },
+      {
+        id: "q07",
+        category: "实践观",
+        prompt: "“哲学家们只是用不同的方式解释世界，而问题在于改变世界。”这句话常考哪篇文本和哪一核心观点？",
+        answer: "《关于费尔巴哈的提纲》；实践观点。",
+        trap: "不要张冠李戴到《资本论》或《论欧洲联邦口号》。《资本论》偏政治经济学，后者关联列宁。",
+        source: "马克思在《关于费尔巴哈的提纲》中系统论述实践观点，创立科学实践观。"
+      },
+      {
+        id: "q08",
+        category: "实践观",
+        prompt: "题干说“其他历史活动得以进行的前提”，问人类历史中首要的社会实践活动，答案是什么？",
+        answer: "物质资料的生产。",
+        trap: "政治活动、理论活动、审美活动都重要，但不是首要前提。",
+        source: "物质资料的生产是人类历史中首要的社会实践活动。"
+      },
+      {
+        id: "q09",
+        category: "认识论",
+        prompt: "研发新药、反复实验、根据结果改进方案，这类材料通常考实践是认识发展的什么？",
+        answer: "动力。",
+        trap: "如果问认识从哪里来，答来源；如果问最终检验真假，答唯一标准。实验推动改进，重点是动力。",
+        source: "实践是认识的来源、动力、目的，并且是检验认识真理性的唯一标准。"
+      },
+      {
+        id: "q10",
+        category: "认识论",
+        prompt: "“从物到感觉和思想”与“从思想和感觉到物”相对立，前者是哪种认识路线？",
+        answer: "唯物主义反映论。",
+        trap: "不要答先验论。先验论强调认识来自先天观念或主体自身，不是从客观对象出发。",
+        source: "唯物主义认识路线坚持反映论，认为认识是主体对客体的反映。"
+      },
+      {
+        id: "q11",
+        category: "认识论",
+        prompt: "只照搬书本结论、轻视实际调查，容易犯什么错误？只凭零散经验、轻视理论概括，又容易犯什么错误？",
+        answer: "教条主义；经验主义。",
+        trap: "教条主义对应片面夸大理性认识；经验主义对应片面夸大感性认识。",
+        source: "割裂感性认识和理性认识的统一，会导致教条主义或经验主义。"
+      },
+      {
+        id: "q12",
+        category: "历史观",
+        prompt: "唯物史观和唯心史观的根本分野，在选择题里通常落在哪一对关系上？",
+        answer: "社会存在和社会意识的关系。",
+        trap: "核心不是“是否承认社会意识有作用”，而是到底谁决定谁。",
+        source: "主张社会存在决定社会意识，还是社会意识决定社会存在，是唯物史观与唯心史观的根本分野。"
+      },
+      {
+        id: "q13",
+        category: "历史观",
+        prompt: "题干出现“创造物质财富、创造精神财富、推动社会变革”，应回忆哪个历史主体？",
+        answer: "人民群众。",
+        trap: "不要落入英雄史观。杰出人物有重要作用，但不能替代人民群众的决定作用。",
+        source: "人民群众是社会物质财富和精神财富的创造者，是社会变革的决定力量。"
+      },
+      {
+        id: "q14",
+        category: "政治经济学",
+        prompt: "如果题目问商品经济是不是人类社会从来就有、永恒存在，应怎样判断？",
+        answer: "不是。商品经济是社会经济发展到一定阶段的产物。",
+        trap: "不要把商品经济说成超历史形式。它有产生和发展的社会条件。",
+        source: "商品经济是社会经济发展到一定阶段的产物。"
+      },
+      {
+        id: "q15",
+        category: "政治经济学",
+        prompt: "两种商品用途不同却能按比例交换。决定交换比例的不是使用价值，而是什么？",
+        answer: "价值。",
+        trap: "使用价值是商品能满足需要的属性，但不决定交换比例。",
+        source: "决定商品交换比例的不是商品的使用价值，而是价值。"
+      },
+      {
+        id: "q16",
+        category: "政治经济学",
+        prompt: "题目问“价值的实体”或“不同商品能够比较的共同质”，答案应落在哪个表述上？",
+        answer: "凝结在商品中的无差别的一般人类劳动。",
+        trap: "不要答商品自然属性、效用大小、购买者偏好。这些不是价值实体。",
+        source: "价值是凝结在商品中的无差别的一般人类劳动。"
+      },
+      {
+        id: "q17",
+        category: "政治经济学",
+        prompt: "甲厂生产很慢、乙厂生产很快，但同种商品价值量不能由某个厂的耗时决定。它由什么决定？",
+        answer: "社会必要劳动时间。",
+        trap: "个别劳动时间会影响个别生产者盈亏，但不决定商品社会价值量。",
+        source: "决定商品价值量的是社会必要劳动时间，而不是个别劳动时间。"
+      },
+      {
+        id: "q18",
+        category: "政治经济学",
+        prompt: "劳动生产率提高，单位商品所需社会必要劳动时间减少。单位商品价值量通常怎样变化？",
+        answer: "降低。商品价值量与劳动生产率成反比。",
+        trap: "不要把“单位时间产品总量增加”和“单位商品价值量增加”混为一谈。",
+        source: "商品价值量与社会必要劳动时间成正比，与劳动生产率成反比。"
+      },
+      {
+        id: "q19",
+        category: "政治经济学",
+        prompt: "马克思说商品卖不出去时“摔坏的不是商品，但一定是商品占有者”。这句话对应哪个说法？",
+        answer: "商品的惊险的跳跃。",
+        trap: "这里考商品到货币的转换风险，不是资本自动增殖，也不是价值规律的作用。",
+        source: "马克思把商品转换成货币称为“商品的惊险的跳跃”。"
+      },
+      {
+        id: "q20",
+        category: "政治经济学",
+        prompt: "价格、利润变化引导生产资料和劳动力在部门间流动，这体现哪一规律的作用？",
+        answer: "价值规律。",
+        trap: "价值规律能自发调节资源配置，但不能消灭商品经济矛盾，也不能保证收入平均。",
+        source: "价值规律自发调节生产资料和劳动力在社会各生产部门之间的分配比例。"
+      },
+      {
+        id: "q21",
+        category: "剩余价值理论",
+        prompt: "工人创造的价值超过劳动力价值，超过部分被资本家无偿占有。这部分价值叫什么？",
+        answer: "剩余价值。",
+        trap: "不要写成利润、使用价值或商品价值。利润是剩余价值的转化形式之一，题干问的是本质概念。",
+        source: "剩余价值是雇佣工人所创造并被资本家无偿占有的超过劳动力价值的那部分价值。"
+      },
+      {
+        id: "q22",
+        category: "资本主义经济危机",
+        prompt: "危机中商品卖不出去，但劳动人民仍有实际需要。这里的生产过剩是什么性质？",
+        answer: "相对过剩。",
+        trap: "不是相对于实际需要的绝对过剩，而是相对于有支付能力的需求而言的过剩。",
+        source: "生产过剩是资本主义经济危机的本质特征，但这种过剩是相对过剩。"
+      },
+      {
+        id: "q23",
+        category: "垄断资本主义",
+        prompt: "金融寡头经济领域的统治方式是什么？控制国家机器的方式又是什么？",
+        answer: "经济领域：参与制；控制国家机器：个人联合。",
+        trap: "真题特别爱把这两个互换。参与制是经济统治，个人联合是政治控制。",
+        source: "金融寡头在经济领域中的统治主要通过参与制实现；对国家机器的控制主要通过个人联合实现。"
+      },
+      {
+        id: "q24",
+        category: "垄断资本主义",
+        prompt: "题干强调“国家政权”和“私人垄断资本”融合在一起，应想到哪个概念？",
+        answer: "国家垄断资本主义。",
+        trap: "不是国家消灭私人资本，也不是共产主义；它仍是垄断资本主义形式。",
+        source: "国家垄断资本主义是国家政权和私人垄断资本融合在一起的垄断资本主义。"
+      },
+      {
+        id: "q25",
+        category: "科学社会主义",
+        prompt: "列宁从资本主义经济政治发展不平衡规律出发，得出社会主义革命可以怎样胜利？",
+        answer: "可以首先在少数甚至单独一个资本主义国家内获得胜利。",
+        trap: "不要答“必须所有国家同时胜利”。列宁的突破正在于否定同时胜利论。",
+        source: "社会主义可能首先在少数甚至单独一个资本主义国家内获得胜利。"
+      },
+      {
+        id: "q26",
+        category: "共产主义社会",
+        prompt: "共产主义第一阶段和高级阶段的个人消费品分配方式分别是什么？",
+        answer: "第一阶段：各尽所能、按劳分配；高级阶段：各尽所能、按需分配。",
+        trap: "不要把按需分配提前到第一阶段。第一阶段还不能实行按需分配。",
+        source: "共产主义第一阶段实行按劳分配，高级阶段实行按需分配。"
+      }
+    ];
+
     const storageKey = "marxism-quiz-v1";
     const letters = ["A", "B", "C", "D"];
     let stats = loadStats();
     let mode = "random";
     let queue = [];
+    let cardQueue = [];
     let currentIndex = 0;
+    let cardIndex = 0;
     let answered = false;
     let currentQuestion = null;
     let currentView = null;
+    let currentCard = null;
 
     const el = {
       counter: document.getElementById("counter"),
@@ -1349,6 +1639,7 @@
       randomMode: document.getElementById("randomMode"),
       orderMode: document.getElementById("orderMode"),
       wrongMode: document.getElementById("wrongMode"),
+      cardMode: document.getElementById("cardMode"),
       resetStats: document.getElementById("resetStats"),
       doneCount: document.getElementById("doneCount"),
       accuracy: document.getElementById("accuracy"),
@@ -1390,7 +1681,9 @@
     function setMode(nextMode) {
       mode = nextMode;
       currentIndex = 0;
+      cardIndex = 0;
       queue = buildQueue(mode);
+      cardQueue = buildCardQueue();
       updateModeButtons();
       renderQuestion();
       renderStats();
@@ -1400,9 +1693,19 @@
       el.randomMode.classList.toggle("active", mode === "random");
       el.orderMode.classList.toggle("active", mode === "order");
       el.wrongMode.classList.toggle("active", mode === "wrong");
+      el.cardMode.classList.toggle("active", mode === "cards");
+    }
+
+    function buildCardQueue() {
+      return shuffle(memoryCards);
     }
 
     function renderQuestion() {
+      if (mode === "cards") {
+        renderCard();
+        return;
+      }
+
       answered = false;
       el.feedback.className = "feedback";
       el.feedback.innerHTML = "";
@@ -1456,15 +1759,48 @@
       const form = forms[Math.floor(Math.random() * forms.length)];
       const options = form.options.map((text, index) => ({
         text,
-        originalIndex: index
+        originalIndex: index,
+        note: (form.optionNotes && form.optionNotes[index]) || buildOptionNote(text, index, form, question)
       }));
       const shuffled = shuffle(options);
       return {
         question: form.question,
         options: shuffled.map(option => option.text),
+        optionNotes: shuffled.map(option => option.note),
         answer: shuffled.findIndex(option => option.originalIndex === form.answer),
         explanation: form.explanation || question.explanation
       };
+    }
+
+    function buildOptionNote(text, index, form, question) {
+      if (index === form.answer) {
+        return "正确。该项准确扣住题干中的关键词和教材原理。";
+      }
+      const rules = [
+        ["个人联合", "陷阱：个人联合是金融寡头控制国家机器的政治方式，不是经济领域统治方式。"],
+        ["参与制", "陷阱：参与制主要用于说明金融寡头在经济领域的统治，若题干问政治控制就属于张冠李戴。"],
+        ["个别劳动时间", "陷阱：个别劳动时间影响个别生产者盈亏，但不决定商品价值量。"],
+        ["社会必要劳动时间", "陷阱：社会必要劳动时间决定价值量；若题干考个别企业效率或盈亏，要注意不要误用。"],
+        ["使用价值", "陷阱：使用价值说明商品能满足需要，但不决定商品交换比例。"],
+        ["劳动生产率", "陷阱：劳动生产率与单位商品价值量成反比，不能直接说它决定交换比例。"],
+        ["按需分配", "陷阱：按需分配属于共产主义高级阶段，不能提前到第一阶段。"],
+        ["按劳分配", "陷阱：按劳分配对应共产主义第一阶段，不是高级阶段的最终分配方式。"],
+        ["经验主义", "陷阱：经验主义是片面夸大感性经验；若题干强调照搬书本结论，应辨为教条主义。"],
+        ["教条主义", "陷阱：教条主义是片面夸大理性认识；若题干强调只凭零散经验，应辨为经验主义。"],
+        ["先验论", "陷阱：先验论把认识来源归于先天观念，和唯物主义反映论相对立。"],
+        ["反映论", "陷阱：反映论强调主体对客体的反映；若题干否认客观对象，就不能选它。"],
+        ["社会意识", "陷阱：社会意识有相对独立性和反作用，但归根到底由社会存在决定。"],
+        ["社会存在", "陷阱：唯物史观强调社会存在决定社会意识，不能倒置为观念决定历史。"],
+        ["质量互变", "陷阱：质量互变规律侧重量变和质变，若题干强调曲折中前进，应选否定之否定。"],
+        ["否定之否定", "陷阱：否定之否定强调前进性和曲折性统一，不是简单重复或量变积累。"],
+        ["物质资料", "陷阱：物质资料生产是首要社会实践；若题干问认识检验标准，则应回到实践。"],
+        ["剩余价值", "陷阱：剩余价值揭示资本主义剥削关系；若题干问商品交换比例，要回到价值。"],
+        ["价值规律", "陷阱：价值规律调节市场资源配置，但不能消灭商品经济矛盾。"],
+        ["国家垄断资本主义", "陷阱：国家垄断资本主义仍是资本主义，不是消灭私人垄断资本后的社会主义。"]
+      ];
+      const hit = rules.find(([keyword]) => text.includes(keyword));
+      if (hit) return hit[1];
+      return "陷阱：该项看似属于马原术语，但与题干限定的关键词、关系或阶段不一致。";
     }
 
     function choose(index, revealOnly = false) {
@@ -1501,17 +1837,98 @@
         <strong>${status}：${letters[currentView.answer]}. ${correctText}</strong>
         <div>${currentView.explanation}</div>
         <div>考点：${currentQuestion.point}</div>
+        <div class="option-analysis">
+          ${currentView.optionNotes.map((note, noteIndex) => `
+            <div class="option-note ${noteIndex === currentView.answer ? "correct-note" : ""}">
+              <b>${letters[noteIndex]}项：</b>${note}
+            </div>
+          `).join("")}
+        </div>
       `;
       renderStats();
     }
 
+    function renderCard() {
+      answered = false;
+      currentQuestion = null;
+      currentView = null;
+      el.feedback.className = "feedback";
+      el.feedback.innerHTML = "";
+
+      if (!cardQueue.length) cardQueue = buildCardQueue();
+      if (cardIndex >= cardQueue.length) {
+        cardQueue = buildCardQueue();
+        cardIndex = 0;
+      }
+
+      currentCard = cardQueue[cardIndex];
+      el.counter.textContent = `卡片 ${cardIndex + 1} / ${cardQueue.length}`;
+      el.tag.textContent = currentCard.category;
+      el.progressBar.style.width = `${((cardIndex + 1) / cardQueue.length) * 100}%`;
+      el.questionText.textContent = "先回忆，再看答案";
+      el.options.innerHTML = `
+        <div class="memory-card">
+          <div class="memory-label">高频速记</div>
+          <div class="memory-prompt">${currentCard.prompt}</div>
+          <div class="memory-hint">先在脑子里说出关键词，再点“显示答案”。不要急着看。</div>
+        </div>
+      `;
+      el.showAnswer.disabled = false;
+      el.next.disabled = false;
+    }
+
+    function revealCard() {
+      if (!currentCard || answered) return;
+      answered = true;
+      el.feedback.className = "feedback show";
+      el.feedback.innerHTML = `
+        <div class="memory-answer">
+          <div><b>答案：</b>${currentCard.answer}</div>
+          <div><b>易混陷阱：</b>${currentCard.trap}</div>
+          <div><b>对应知识点：</b>${currentCard.source}</div>
+        </div>
+        <div class="memory-actions">
+          <button class="text-button primary" type="button" data-memory-rate="mastered">已掌握</button>
+          <button class="text-button" type="button" data-memory-rate="fuzzy">还模糊</button>
+          <button class="text-button" type="button" data-memory-rate="unknown">不会</button>
+          <button class="text-button" type="button" data-practice-point="${currentCard.id}">用选择题考我</button>
+        </div>
+      `;
+      [...el.feedback.querySelectorAll("[data-memory-rate]")].forEach(button => {
+        button.addEventListener("click", () => rateCard(button.dataset.memoryRate));
+      });
+      const practice = el.feedback.querySelector("[data-practice-point]");
+      practice.addEventListener("click", () => jumpToQuestion(practice.dataset.practicePoint));
+    }
+
+    function rateCard(level) {
+      if (!currentCard) return;
+      const record = stats[currentCard.id] || { attempts: 0, correct: 0, wrong: 0 };
+      record.memory = record.memory || { mastered: 0, fuzzy: 0, unknown: 0 };
+      record.memory[level] = (record.memory[level] || 0) + 1;
+      if (level === "unknown") record.wrong = (record.wrong || 0) + 1;
+      stats[currentCard.id] = record;
+      saveStats();
+      renderStats();
+      nextQuestion();
+    }
+
     function nextQuestion() {
+      if (mode === "cards") {
+        cardIndex += 1;
+        renderCard();
+        return;
+      }
       if (!queue.length) return;
       currentIndex += 1;
       renderQuestion();
     }
 
     function revealAnswer() {
+      if (mode === "cards") {
+        revealCard();
+        return;
+      }
       if (!currentQuestion || answered) return;
       choose(currentView.answer, true);
     }
@@ -1594,6 +2011,7 @@
     el.randomMode.addEventListener("click", () => setMode("random"));
     el.orderMode.addEventListener("click", () => setMode("order"));
     el.wrongMode.addEventListener("click", () => setMode("wrong"));
+    el.cardMode.addEventListener("click", () => setMode("cards"));
     el.resetStats.addEventListener("click", resetStats);
     el.next.addEventListener("click", nextQuestion);
     el.showAnswer.addEventListener("click", revealAnswer);
@@ -1606,6 +2024,7 @@
     }
 
     queue = buildQueue(mode);
+    cardQueue = buildCardQueue();
     renderQuestion();
     renderStats();
   </script>
