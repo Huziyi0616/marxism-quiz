@@ -366,7 +366,16 @@
     .source-point b {
       display: block;
       color: var(--accent-dark);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .source-text {
+      color: #111827;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.72;
     }
 
     .option-note {
@@ -557,6 +566,11 @@
       .option-button {
         grid-template-columns: 32px 1fr;
         padding: 10px;
+      }
+
+      .source-text {
+        font-size: 16px;
+        line-height: 1.68;
       }
     }
   </style>
@@ -853,7 +867,7 @@
       {
         id: "q25",
         category: "科学社会主义",
-        point: "列宁指出社会主义革命可以首先在一个或者几个国家获得胜利。",
+        point: "列宁总结当时变化了的新情况，深刻论述了社会主义革命可以首先在一个或者几个国家获得胜利。1915年，他在《论欧洲联邦口号》一文中明确指出：“经济和政治发展的不平衡是资本主义的绝对规律。由此就应得出结论：社会主义可能首先在少数甚至在单独一个资本主义国家内获得胜利。”",
         question: "列宁根据资本主义经济和政治发展不平衡规律，得出的重要结论是？",
         options: ["社会主义可能首先在少数甚至单独一个资本主义国家内获得胜利", "社会主义必须同时在所有国家取得胜利", "社会主义只能在最发达国家最后出现", "资本主义发展不平衡会自动消灭阶级差别"],
         answer: 0,
@@ -1621,7 +1635,7 @@
         prompt: "列宁从资本主义经济政治发展不平衡规律出发，得出社会主义革命可以怎样胜利？",
         answer: "可以首先在少数甚至单独一个资本主义国家内获得胜利。",
         trap: "不要答“必须所有国家同时胜利”。列宁的突破正在于否定同时胜利论。",
-        source: "社会主义可能首先在少数甚至单独一个资本主义国家内获得胜利。"
+        source: "列宁总结当时变化了的新情况，深刻论述了社会主义革命可以首先在一个或者几个国家获得胜利。1915年，他在《论欧洲联邦口号》一文中明确指出：“经济和政治发展的不平衡是资本主义的绝对规律。由此就应得出结论：社会主义可能首先在少数甚至在单独一个资本主义国家内获得胜利。”"
       },
       {
         id: "q26",
@@ -2439,7 +2453,7 @@
         <strong>${status}：${letters[currentView.answer]}. ${correctText}</strong>
         <div class="source-point">
           <b>对应知识点原句</b>
-          <div>${currentQuestion.point}</div>
+          <div class="source-text">${currentQuestion.point}</div>
         </div>
         <div><b>解析：</b>${currentView.explanation}</div>
         <div class="option-analysis">
@@ -2490,7 +2504,10 @@
         <div class="memory-answer">
           <div><b>答案：</b>${currentCard.answer}</div>
           <div><b>易混陷阱：</b>${currentCard.trap}</div>
-          <div><b>对应知识点：</b>${currentCard.source}</div>
+          <div class="source-point">
+            <b>对应知识点原句</b>
+            <div class="source-text">${currentCard.source}</div>
+          </div>
         </div>
         <div class="memory-actions">
           <button class="text-button primary" type="button" data-memory-rate="mastered">已掌握</button>
