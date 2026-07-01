@@ -1,4 +1,4 @@
-const CACHE_NAME = "marxism-quiz-pwa-v4";
+const CACHE_NAME = "marxism-quiz-pwa-v5";
 const ASSETS = [
   "./",
   "index.html",

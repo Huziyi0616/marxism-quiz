@@ -380,6 +380,14 @@
       line-height: 1.78;
     }
 
+    .source-keyword {
+      color: #b4232a;
+      font-weight: 950;
+      background: rgba(187, 55, 57, .12);
+      border-radius: 5px;
+      padding: 0 3px;
+    }
+
     .option-note {
       padding: 9px 10px;
       border: 1px solid var(--line);
@@ -2924,6 +2932,41 @@
       return "陷阱：该项看似属于马原术语，但与题干限定的关键词、关系或阶段不一致。";
     }
 
+    function escapeHtml(text) {
+      return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function highlightSourceText(text) {
+      const keywords = [
+        "社会必要劳动时间", "劳动生产率", "个别劳动时间", "等价交换",
+        "使用价值", "交换价值", "价值规律", "剩余价值", "劳动力价值",
+        "生产过剩", "相对过剩", "有支付能力", "参与制", "个人联合",
+        "国家政权", "私人垄断资本", "按劳分配", "按需分配",
+        "实践是认识的来源", "认识发展的动力", "认识的目的", "唯一标准",
+        "从物到感觉和思想", "从思想和感觉到物", "反映论", "先验论",
+        "能动反映", "感性认识", "理性认识", "经验主义", "教条主义",
+        "社会存在", "社会意识", "相对独立性", "唯物史观", "唯心史观",
+        "人民群众", "历史的创造者", "决定力量",
+        "内容与形式", "内容是事物存在的基础", "反作用",
+        "否定之否定规律", "前进性", "曲折性", "螺旋式上升", "波浪式前进",
+        "物质资料的生产", "首要的社会实践活动", "科学实践观",
+        "人民性", "人民至上", "唯物史观", "剩余价值学说",
+        "商品经济", "社会分工", "不同所有者", "抽象劳动", "具体劳动",
+        "商品的惊险的跳跃", "经济和政治发展的不平衡", "首先", "少数", "单独一个",
+        "各尽所能"
+      ].sort((a, b) => b.length - a.length);
+      const html = escapeHtml(text);
+      const pattern = new RegExp(keywords.map(keyword => {
+        return escapeHtml(keyword).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }).join("|"), "g");
+      return html.replace(pattern, match => `<span class="source-keyword">${match}</span>`);
+    }
+
     function choose(index, revealOnly = false) {
       if (!currentQuestion || !currentView || answered) return;
       answered = true;
@@ -2954,12 +2997,13 @@
       const status = revealOnly ? "答案" : (isCorrect ? "答对了" : "答错了");
       const correctText = currentView.options[currentView.answer];
       const sourcePoint = textbookPoints[currentQuestion.id] || currentQuestion.point;
+      const highlightedSourcePoint = highlightSourceText(sourcePoint);
       el.feedback.className = "feedback show";
       el.feedback.innerHTML = `
         <strong>${status}：${letters[currentView.answer]}. ${correctText}</strong>
         <div class="source-point">
           <b>对应知识点原句</b>
-          <div class="source-text">${sourcePoint}</div>
+          <div class="source-text">${highlightedSourcePoint}</div>
         </div>
         <div><b>解析：</b>${currentView.explanation}</div>
         <div class="option-analysis">
@@ -3005,6 +3049,7 @@
     function revealCard() {
       if (!currentCard || answered) return;
       answered = true;
+      const highlightedCardSource = highlightSourceText(currentCard.source || textbookPoints[currentCard.id]);
       el.feedback.className = "feedback show";
       el.feedback.innerHTML = `
         <div class="memory-answer">
@@ -3012,7 +3057,7 @@
           <div><b>易混陷阱：</b>${currentCard.trap}</div>
           <div class="source-point">
             <b>对应知识点原句</b>
-            <div class="source-text">${currentCard.source || textbookPoints[currentCard.id]}</div>
+            <div class="source-text">${highlightedCardSource}</div>
           </div>
         </div>
         <div class="memory-actions">
